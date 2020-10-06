@@ -1,0 +1,173 @@
+---
+title: "<b>Personality Report <br/><i><div class='head'>(User's Profile)</div></i></b>"
+author: "Persona"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: 
+  html_document:
+   
+    css: newstyle_f.css
+    
+    self_contained: yes
+    highlight: pygments
+  latex_engine: xelatex
+  documentclass: article
+  classoption: a4paper
+---
+<div class="logo">
+<img src="www/logo.png" style="position:absolute;top:0px; width: 230px;height:110px;" />
+</div>
+
+```{r setup, include=FALSE,comment=NA, results='asis'}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, cache=FALSE,comment = NA,results = 'hide')
+```
+
+
+```{r pressure, echo=FALSE}
+
+library(RMySQL)
+library(plotly)
+ mydb = dbConnect(MySQL(), user='root', password='Kishan@19972', dbname='persona', host='127.0.0.1', port=3306, DBMSencoding="UTF-8")
+  
+  query2 <- sprintf(
+      "Select * from t_userdetails ORDER BY U_ID DESC LIMIT 1"
+    )
+    
+   query1 <- sprintf(
+      "Select * from t_result ORDER BY R_ID DESC LIMIT 1"
+    )
+   
+    
+    User <- dbGetQuery(mydb, query2)
+    
+    Result<- dbGetQuery(mydb, query1)
+    
+    dbDisconnect(mydb)
+    
+     Traits <- names(Result)
+    
+    Sentiments <- unname(unlist(Result[1,]))
+ 
+   F_result <- data.frame(Traits,Sentiments)
+```
+
+<br/>
+
+
+###Personal Details:
+
+<b>Name: </b> `r User$Name`<br/>
+<b>TwitterID:</b> `r User$Screen_name`<br/>
+<b>Location:</b> `r User$Location` <br/>
+<b>Description: </b>`r User$Description`<br/>
+<b>Instagram URL:</b> `r User$Instagram_url`<br/>
+<b>Followers:</b> `r format(User$Followers,scientific=FALSE)` <br/>
+<b>Following:</b> `r User$Following`<br/>
+<b>Tweets: </b>`r format(User$Tweet_count,scientific=FALSE)` <br/>
+<b>Account Created on:</b> `r User$Account_created`<br/>
+<b>Verified Account: </b>`r User$Verified`
+
+<img src=`r User$Profile_image` style="position:absolute;right:30px;top:160px; width: 110px;"/>
+
+
+
+
+###Personality Traits Rating:
+```{r plot1,results='asis'}  
+  
+    
+    plot1 <- F_result[c(4:13),]
+    
+    #knitr::kable(x = plot1, digits = 2)
+   plot1$Traits <- factor(plot1$Traits)
+     p1 <- plot_ly(plot1,x=~Traits,y=~Sentiments,type='bar')
+     p1
+    
+```
+
+<P style="page-break-before: always">
+
+<br/>
+
+###OCEAN Personality Indicator:
+
+<br/>
+
+<div class="ocean">
+```{r echo=FALSE, out.width='60%',out.height='60%',out.align='center',results='asis'}
+knitr::include_graphics('./www/Ocean.jpe')
+```
+</div>
+
+```{r plot2,results='asis'}
+    plot2 <- F_result[c(17:26),]
+    
+    plot2$Traits <- factor(plot2$Traits)
+    
+    plot2_h <- plot2[c(1,3,5,7,9),]
+    
+    plot2_l <- plot2[c(2,4,6,8,10),]
+    
+    high <- plot2_h$Sentiments
+    low <- plot2_l$Sentiments
+    names <- c("Extraversion","Neuroticism","Conscientiousness","Openness","Agreeableness")
+    
+    plot2_f <- data.frame(names,high,low)
+    
+    
+    p2 <- plot_ly(plot2_f, x = ~names, y = ~high, type = 'bar', name = 'Likely', marker = list(color = 'rgb(49,130,189)')) %>%
+        add_trace(y = ~low, name = 'Unlikely', marker = list(color = 'rgb(204,204,204)')) %>%
+        layout(xaxis = list(title = "", tickangle = -45),
+               yaxis = list(title = ""),
+               margin = list(b = 100),
+               barmode = 'group')
+    p2
+```
+
+<P style="page-break-before: always">
+
+<br/>
+
+###Positive Negative Tweet Ratio:
+
+<br/>
+
+``` {r plot3,results='asis'}
+    plot3 <- F_result[c(14:16),]
+    plot3$Traits <- factor(plot3$Traits)
+    plot3$Traits <- c("Positive","Negative", "Neutral")
+    p3  <- plot_ly(plot3, labels = ~Traits, values = ~Sentiments, type = 'pie',
+                     textposition = 'inside',
+                     textinfo = 'label+percent',
+                     insidetextfont = list(color = '#FFFFFF'),
+                     hoverinfo = 'text',
+                     text = ~paste(Sentiments),
+                     marker = list(colors = colors,
+                                   line = list(color = '#FFFFFF', width = 1)),
+                     #The 'pull' attribute can also be used to create space between the sectors
+                     showlegend = FALSE) %>%
+        layout(
+               xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+               yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+    
+    p3
+```
+  
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+## <i>Thank you for using <b>PERSONA</b></i>
+
+

@@ -1,0 +1,12 @@
+name: Persona
+title: Persona
+username:
+account: kishan
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 303358
+bundleId: 1286901
+url: https://kishan.shinyapps.io/Persona/
+when: 1521979413.14519
+asMultiple: FALSE
+asStatic: FALSE
